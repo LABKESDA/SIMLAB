@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIM-LABKESDA Kabupaten Tasikmalaya</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* ================= ATURAN KHUSUS CETAK RESMI (A4, TIMES NEW ROMAN 12PT) ================= */
+    @page {
+      size: A4 portrait;
+      margin: 15mm 15mm 15mm 15mm;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-area, #print-area * {
+        visibility: visible !important;
+      }
+      #print-area {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        font-family: 'Times New Roman', Times, serif !important;
+        font-size: 12pt !important;
+        color: #000 !important;
+        background: #fff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+
+      /* Tabel Hasil / Data Utama */
+      table.table-bordered {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
+      }
+      table.table-bordered th, 
+      table.table-bordered td {
+        border: 1px solid #000 !important;
+        padding: 5px 8px !important;
+        font-size: 11pt !important;
+      }
+
+      /* Tabel Layout / Informasi & TTD */
+      table.table-info,
+      table.table-ttd {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        margin-bottom: 10px !important;
+      }
+      table.table-info td {
+        border: none !important;
+        padding: 3px 4px !important;
+        font-size: 11pt !important;
+        vertical-align: top !important;
+      }
+      table.table-ttd td {
+        border: none !important;
+        padding: 0 !important;
+        font-size: 11pt !important;
+        vertical-align: top !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+  <!-- ================= LOG IN SCREEN ================= -->
+  <div id="login-modal" class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
+      <div class="text-center mb-6">
+        <img src="https://tasikmalayakab.go.id/wp-content/themes/tasikmalaya-theme/assets/images/tasikmalaya-crest.png" alt="Logo Tasikmalaya" class="h-20 mx-auto mb-3">
+        <h2 class="text-xl font-bold text-emerald-800">LABKESDA KABUPATEN TASIKMALAYA</h2>
+        <p class="text-xs text-slate-500">Sistem Informasi Manajemen Laboratorium Kesehatan</p>
+      </div>
+      <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-1">Username</label>
+          <input type="text" id="login-username" class="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Password</label>
+          <input type="password" id="login-password" class="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" required>
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg transition shadow">Masuk Sistem</button>
+      </form>
+      <div class="mt-4 text-center text-xs text-slate-500">
+        Lupa password? <a href="mailto:labkabtsm@gmail.com?subject=Reset%20Password%20SIM-LABKESDA" class="text-emerald-600 underline font-semibold">Reset via Email (labkabtsm@gmail.com)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= NAVBAR & NAVIGATION ================= -->
+  <header id="main-header" class="bg-emerald-800 text-white shadow-md hidden">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <img src="https://tasikmalayakab.go.id/wp-content/themes/tasikmalaya-theme/assets/images/tasikmalaya-crest.png" alt="Logo" class="h-10">
+        <div>
+          <h1 class="font-bold text-lg leading-tight">LABKESDA KAB. TASIKMALAYA</h1>
+          <p class="text-xs text-emerald-200">Jl. Pancasila No. 27 Kota Tasikmalaya</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="text-sm bg-emerald-700 px-3 py-1 rounded-full"><i class="fa-solid fa-user-circle mr-1"></i> <span id="user-display">admin1</span></span>
+        <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-sm transition"><i class="fa-solid fa-sign-out-alt mr-1"></i> Keluar</button>
+      </div>
+    </div>
+    <!-- MENU BAR -->
+    <nav class="bg-emerald-900 border-t border-emerald-700">
+      <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-1">
+        <button onclick="switchTab('antrian')" id="tab-antrian" class="nav-btn active border-b-2 border-amber-400 text-white px-4 py-3 text-sm font-semibold flex items-center whitespace-nowrap"><i class="fa-solid fa-bullhorn mr-2"></i> 1. Nomor Antrian</button>
+        <button onclick="switchTab('pendaftaran')" id="tab-pendaftaran" class="nav-btn text-emerald-200 hover:text-white px-4 py-3 text-sm font-semibold flex items-center whitespace-nowrap"><i class="fa-solid fa-id-card mr-2"></i> 2. Pendaftaran</button>
+        <button onclick="switchTab('hasil')" id="tab-hasil" class="nav-btn text-emerald-200 hover:text-white px-4 py-3 text-sm font-semibold flex items-center whitespace-nowrap"><i class="fa-solid fa-vials mr-2"></i> 3. Input Hasil Lab</button>
+        <button onclick="switchTab('konsultasi')" id="tab-konsultasi" class="nav-btn text-emerald-200 hover:text-white px-4 py-3 text-sm font-semibold flex items-center whitespace-nowrap"><i class="fa-solid fa-user-md mr-2"></i> 4. Konsultasi & Surat</button>
+        <button onclick="switchTab('rekap')" id="tab-rekap" class="nav-btn text-emerald-200 hover:text-white px-4 py-3 text-sm font-semibold flex items-center whitespace-nowrap"><i class="fa-solid fa-database mr-2"></i> 5. Rekap Data</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main id="main-content" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 hidden">
+
+    <!-- 1. MENU NOMOR ANTRIAN -->
+    <section id="sec-antrian" class="tab-content space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-volume-high text-emerald-600 mr-2"></i> Pemanggilan Nomor Antrian (Bahasa Indonesia)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div class="bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-8 text-center">
+            <span class="text-sm font-bold text-emerald-800 uppercase tracking-wide">Nomor Antrian Saat Ini</span>
+            <div id="current-queue-num" class="text-7xl font-extrabold text-emerald-900 my-4">A-001</div>
+            <p class="text-xs text-slate-600" id="queue-status-text">Siap Memanggil</p>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Pilih Loket / Poliklinik</label>
+              <select id="antrian-loket" class="w-full border p-2.5 rounded-lg">
+                <option value="Loket Pendaftaran">Loket Pendaftaran</option>
+                <option value="Laboratorium Klinik">Laboratorium Klinik</option>
+                <option value="Laboratorium Lingkungan">Laboratorium Lingkungan</option>
+                <option value="Ruang Konsultasi Dokter">Ruang Konsultasi Dokter</option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="prevQueue()" class="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 rounded-lg"><i class="fa-solid fa-backward mr-1"></i> Sebelum</button>
+              <button onclick="callQueue()" class="flex-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-lg"><i class="fa-solid fa-bullhorn mr-2"></i> Panggil Antrian</button>
+              <button onclick="nextQueue()" class="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 rounded-lg">Berikut <i class="fa-solid fa-forward ml-1"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MENU PENDAFTARAN -->
+    <section id="sec-pendaftaran" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-user-plus text-emerald-600 mr-2"></i> Form Pendaftaran Pasien & Permintaan Spesimen</h2>
+          
+          <!-- SEARCH PASIEN DROPDOWN -->
+          <div class="relative w-80">
+            <input type="text" id="search-pendaftaran" onkeyup="searchPasienRiwayat(this.value)" placeholder="Cari Riwayat NIK / Nama..." class="w-full border pl-9 pr-3 py-1.5 text-sm rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" autocomplete="off">
+            <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+            <div id="search-results-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-300 rounded-lg shadow-2xl z-30 max-h-64 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+
+        <form id="form-pendaftaran-main" onsubmit="savePendaftaran(event)" class="space-y-6">
+          <input type="hidden" id="edit-patient-id" value="">
+          
+          <!-- Identitas Pasien -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg border">
+            <h3 class="col-span-full font-bold text-emerald-800 border-b pb-1 text-sm"><i class="fa-solid fa-address-card mr-1"></i> DATA PASIEN / PEMOHON</h3>
+            <div>
+              <label class="block text-xs font-semibold mb-1">NIK *</label>
+              <input type="text" id="p-nik" class="w-full border p-2 text-sm rounded" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Nama Lengkap *</label>
+              <input type="text" id="p-nama" class="w-full border p-2 text-sm rounded" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Nama Perusahaan / Instansi</label>
+              <input type="text" id="p-perusahaan" class="w-full border p-2 text-sm rounded" placeholder="Nama perusahaan / instansi">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Jenis Kelamin</label>
+              <select id="p-jk" class="w-full border p-2 text-sm rounded">
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Tempat Lahir</label>
+              <input type="text" id="p-tmpt-lahir" class="w-full border p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Tanggal Lahir</label>
+              <input type="date" id="p-tgl-lahir" onchange="hitungUmur()" class="w-full border p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Umur</label>
+              <input type="text" id="p-umur" class="w-full border p-2 text-sm rounded bg-slate-100" readonly>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold mb-1">Alamat Lengkap</label>
+              <input type="text" id="p-alamat" class="w-full border p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">No. HP / WhatsApp</label>
+              <input type="text" id="p-nohp" class="w-full border p-2 text-sm rounded">
+            </div>
+          </div>
+
+          <!-- Detail Spesimen & Waktu -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-lg border">
+            <h3 class="col-span-full font-bold text-emerald-800 border-b pb-1 text-sm"><i class="fa-solid fa-flask mr-1"></i> DETAIL SPESIMEN & WAKTU PEMERIKSAAN</h3>
+            <div>
+              <label class="block text-xs font-semibold mb-1">No. Lab (Otomatis)</label>
+              <input type="text" id="p-nolab" class="w-full border p-2 text-sm rounded bg-amber-50 font-mono font-bold" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Tanggal Permintaan</label>
+              <input type="date" id="p-tgl-minta" class="w-full border p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Tanggal Pemeriksaan</label>
+              <input type="date" id="p-tgl-periksa" class="w-full border p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Dokter Pengirim</label>
+              <input type="text" id="p-dokter-pengirim" class="w-full border p-2 text-sm rounded" placeholder="dr. ...">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Jenis Spesimen</label>
+              <input type="text" id="p-jns-spesimen" class="w-full border p-2 text-sm rounded" placeholder="Darah/Urin/Air/Pangan">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Bentuk Spesimen</label>
+              <input type="text" id="p-btk-spesimen" class="w-full border p-2 text-sm rounded" placeholder="Cair/Padat">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Kondisi Spesimen</label>
+              <input type="text" id="p-knd-spesimen" class="w-full border p-2 text-sm rounded" placeholder="Baik/Dingin/Segel">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Volume Spesimen</label>
+              <input type="text" id="p-vol-spesimen" class="w-full border p-2 text-sm rounded" placeholder="50 ml / 5 cc">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Waktu Pengambilan</label>
+              <input type="datetime-local" id="p-waktu-ambil" class="w-full border p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Waktu Pemeriksaan</label>
+              <input type="datetime-local" id="p-waktu-periksa" class="w-full border p-2 text-sm rounded">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold mb-1">Waktu Selesai Pemeriksaan</label>
+              <input type="datetime-local" id="p-waktu-selesai" class="w-full border p-2 text-sm rounded">
+            </div>
+          </div>
+
+          <!-- Permintaan Jenis Pemeriksaan -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-lg border">
+            <!-- Lab Klinik -->
+            <div class="space-y-2">
+              <h4 class="font-bold text-emerald-900 border-b pb-1 text-sm"><i class="fa-solid fa-microscope text-emerald-600 mr-1"></i> LAB KLINIK</h4>
+              <div class="max-h-60 overflow-y-auto space-y-1 bg-white p-3 border rounded text-xs">
+                <label class="flex items-center space-x-2 font-bold text-slate-700"><input type="checkbox" name="klinik" value="URIN RUTIN"> <span>URIN RUTIN (Albumin, Reduksi, Urobilin, Sedimen, Bilirubin, pH, BJ)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Hemoglobin"> <span>Hemoglobin</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Leukosit"> <span>Leukosit</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Hitung jenis"> <span>Hitung jenis</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Laju endap darah / BSE"> <span>Laju endap darah / BSE</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Eritrosit"> <span>Eritrosit</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Trombosit"> <span>Trombosit</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Hematokrit"> <span>Hematokrit</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Waktu perdarahan"> <span>Waktu perdarahan</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Waktu pembekuan"> <span>Waktu pembekuan</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Widal"> <span>Widal</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Rhemathoid faktor"> <span>Rhemathoid faktor</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Syphilis"> <span>Syphilis</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="HIV"> <span>HIV</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Malaria"> <span>Malaria</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Tes Kehamilan"> <span>Tes Kehamilan</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Golongan Darah + Rhesus"> <span>Golongan Darah + Rhesus</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="HbsAg"> <span>HbsAg</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Glukosa Puasa"> <span>Glukosa Puasa</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Glukosa 2 jam PP"> <span>Glukosa 2 jam PP</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Glukosa sewaktu"> <span>Glukosa sewaktu</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Kolesterol"> <span>Kolesterol</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Trigliserida"> <span>Trigliserida</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="HDL Direct"> <span>High density lipoprotein direct (HDL)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="LDL Direct"> <span>Low density lipoprotein direct (LDL)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Asam Urat"> <span>Asam Urat</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Ureum"> <span>Ureum</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Creatinin"> <span>Creatinin</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="SGOT"> <span>SGOT</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="SGPT"> <span>SGPT</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Bilirubin Total"> <span>Bilirubin Total (Direct/Indirect)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Protein Total"> <span>Protein Total (Albumin/Globulin)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Salmonella IgG/IgM"> <span>Salmonella (IgG, IgM)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Dengue IgG/IgM"> <span>Dengue (IgG, IgM)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Electrolit"> <span>Electrolit (Na, K, Ca)</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" name="klinik" value="Narkoba"> <span>Narkoba</span></label>
+              </div>
+            </div>
+
+            <!-- Lab Lingkungan -->
+            <div class="space-y-2">
+              <h4 class="font-bold text-emerald-900 border-b pb-1 text-sm"><i class="fa-solid fa-tree text-emerald-600 mr-1"></i> LAB LINGKUNGAN</h4>
+              <div class="max-h-60 overflow-y-auto space-y-1 bg-white p-3 border rounded text-xs">
+                <p class="font-bold text-slate-700 mt-1">Mikrobiologi Air</p>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Coliform Total"> <span>Coliform Total</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Pemeriksaan Tinja"> <span>Pemeriksaan Tinja</span></label>
+                
+                <p class="font-bold text-slate-700 mt-1">Kimia Air</p>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="TDS"> <span>Total Padatan Terlarut (TDS)</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Kekeruhan"> <span>Kekeruhan</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Kromium"> <span>Kromium</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Suhu"> <span>Suhu</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Warna"> <span>Warna</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Bau"> <span>Bau</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Besi (Fe)"> <span>Besi (Fe)</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Mangan (Mn)"> <span>Mangan (Mn)</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Nitrat (NO3)"> <span>Nitrat (NO3)</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Nitrit (NO2)"> <span>Nitrit (NO2)</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="pH Lingkungan"> <span>pH Lingkungan</span></label>
+
+                <p class="font-bold text-slate-700 mt-1">Mikrobiologi Lingkungan</p>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="E. Coli Pangan"> <span>Escherichia Coli Pangan</span></label>
+
+                <p class="font-bold text-slate-700 mt-1">Bahan Tambahan Pangan</p>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Formalin"> <span>Formalin</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Borax"> <span>Borax</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Rhodamin B"> <span>Rhodamin B</span></label>
+                <label class="flex items-center space-x-2 pl-2"><input type="checkbox" name="lingkungan" value="Methanil Yellow"> <span>Methanil Yellow</span></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- PERMINTAAN KONSULTASI DOKTER / SURAT KETERANGAN -->
+          <div class="bg-slate-50 p-4 rounded-lg border space-y-3">
+            <h3 class="font-bold text-emerald-800 border-b pb-1 text-sm"><i class="fa-solid fa-user-md mr-1"></i> PERMINTAAN KONSULTASI DOKTER & SURAT KETERANGAN</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <label class="flex items-center space-x-2 font-semibold text-slate-700 bg-white p-2 rounded border">
+                <input type="checkbox" id="req-konsultasi" class="w-4 h-4 text-emerald-600 rounded">
+                <span>Konsultasi Dokter</span>
+              </label>
+              <div class="flex flex-col md:flex-row items-start md:items-center gap-2 bg-white p-2 rounded border">
+                <label class="flex items-center space-x-2 font-semibold text-slate-700 whitespace-nowrap">
+                  <input type="checkbox" id="req-surat" onchange="toggleSuratSelect(this.checked)" class="w-4 h-4 text-emerald-600 rounded">
+                  <span>Penerbitan Surat Keterangan:</span>
+                </label>
+                <select id="p-jns-surat-req" class="border p-1.5 text-xs rounded bg-slate-100 w-full md:w-auto" disabled>
+                  <option value="Surat Keterangan Sehat">Surat Keterangan Sehat</option>
+                  <option value="Surat Keterangan Sakit">Surat Keterangan Sakit</option>
+                  <option value="Surat Keterangan Bebas Buta Warna">Surat Keterangan Bebas Buta Warna</option>
+                  <option value="Surat Keterangan Bebas Narkoba">Surat Keterangan Bebas Narkoba</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Petugas Penanggung Jawab & Pejabat Penandatangan -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-lg border">
+            <h3 class="col-span-full font-bold text-emerald-800 border-b pb-1 text-sm"><i class="fa-solid fa-users-gear mr-1"></i> PETUGAS PENANGGUNG JAWAB & PEJABAT PENANDATANGAN</h3>
+            
+            <div>
+              <label class="block text-xs font-semibold mb-1">Petugas Pendaftaran</label>
+              <input type="text" id="ptg-sampling" class="w-full border p-2 text-xs rounded" value="Arif Rahman" placeholder="Arif Rahman">
+            </div>
+            
+            <div>
+              <label class="block text-xs font-semibold mb-1">Petugas Penerima Sampel</label>
+              <input type="text" id="ptg-penerima" class="w-full border p-2 text-xs rounded" placeholder="Nama Petugas">
+            </div>
+
+            <!-- Pilihan Petugas Laboratorium -->
+            <div class="bg-white p-2.5 rounded border border-slate-200">
+              <label class="block text-xs font-bold text-emerald-800 mb-1">Petugas Laboratorium (Printout)</label>
+              <select id="sel-ptg-pemeriksa" onchange="handleSelectPtgLab(this.value)" class="w-full border p-1.5 text-xs rounded mb-1.5 bg-slate-50">
+                <option value="MIRWAN SETIAWAN, S.ST.|198112272009021001">MIRWAN SETIAWAN, S.ST.</option>
+                <option value="ELIS HENI HERYANI, A.Md, S.KM.|197703282011012001">ELIS HENI HERYANI, A.Md, S.KM.</option>
+                <option value="custom">-- Tulis Manual / Custom --</option>
+              </select>
+              <input type="text" id="ptg-pemeriksa" class="w-full border p-1.5 text-xs rounded mb-1" placeholder="Nama Petugas Lab" value="MIRWAN SETIAWAN, S.ST.">
+              <input type="text" id="ptg-nip-pemeriksa" class="w-full border p-1.5 text-xs rounded" placeholder="NIP Petugas Lab" value="198112272009021001">
+            </div>
+
+            <!-- Pilihan Kepala Labkesda -->
+            <div class="bg-white p-2.5 rounded border border-slate-200">
+              <label class="block text-xs font-bold text-emerald-800 mb-1">Kepala Labkesda Kab. Tasikmalaya</label>
+              <select id="sel-kepala-lab" onchange="handleSelectKepalaLab(this.value)" class="w-full border p-1.5 text-xs rounded mb-1.5 bg-slate-50">
+                <option value="T. ALDYANSYAH, S.T, M.M|197811252005011003">T. ALDYANSYAH, S.T, M.M</option>
+                <option value="custom">-- Tulis Manual / Custom --</option>
+              </select>
+              <input type="text" id="kepala-lab" class="w-full border p-1.5 text-xs rounded mb-1" placeholder="Nama Kepala Labkesda" value="T. ALDYANSYAH, S.T, M.M">
+              <input type="text" id="kepala-lab-nip" class="w-full border p-1.5 text-xs rounded" placeholder="NIP Kepala Labkesda" value="197811252005011003">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold mb-1">Petugas Verifikator</label>
+              <input type="text" id="ptg-verifikator" class="w-full border p-2 text-xs rounded" placeholder="Nama Petugas">
+            </div>
+            
+            <div>
+              <label class="block text-xs font-semibold mb-1">Petugas Validasi</label>
+              <input type="text" id="ptg-validasi" class="w-full border p-2 text-xs rounded" placeholder="Nama Petugas">
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg shadow"><i class="fa-solid fa-save mr-1"></i> Simpan Pendaftaran</button>
+            <button type="button" onclick="cetakBuktiPendaftaran()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow"><i class="fa-solid fa-print mr-1"></i> Cetak Bukti</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. INPUT HASIL LAB -->
+    <section id="sec-hasil" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-square-poll-horizontal text-emerald-600 mr-2"></i> Pencatatan Hasil Pemeriksaan Laboratorium</h2>
+        
+        <!-- Search Pasien Terdaftar -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6 bg-amber-50 p-4 rounded-lg border border-amber-200">
+          <div class="flex-1 relative">
+            <label class="block text-xs font-bold text-amber-900 mb-1">Cari No. Lab / Nama Pasien Terdaftar:</label>
+            <input type="text" id="search-hasil-pasien" onkeyup="cariPasienUntukHasil(this.value)" placeholder="Ketik No Lab atau Nama Pasien..." class="w-full border p-2 text-sm rounded-lg outline-none focus:ring-2 focus:ring-amber-500" autocomplete="off">
+            <div id="search-hasil-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-300 rounded-lg shadow-2xl z-30 max-h-64 overflow-y-auto text-xs"></div>
+          </div>
+          <div class="flex items-end">
+            <span class="text-xs text-slate-500">* Nilai di luar rujukan normal akan otomatis ditandai bintang (<b>*</b>).</span>
+          </div>
+        </div>
+
+        <!-- Selected Patient Status -->
+        <div id="selected-patient-info" class="hidden bg-emerald-50 border border-emerald-300 p-3 rounded-lg mb-4 text-xs flex justify-between">
+          <div><strong>No. Lab:</strong> <span id="lbl-nolab">-</span> | <strong>Nama:</strong> <span id="lbl-nama">-</span> | <strong>Umur/JK:</strong> <span id="lbl-umur-jk">-</span></div>
+          <div><span class="bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded font-bold">Terpilih</span></div>
+        </div>
+
+        <!-- TABS KLINIK VS LINGKUNGAN -->
+        <div class="border-b border-slate-200 mb-4">
+          <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+            <li class="mr-2">
+              <button onclick="switchHasilSubTab('klinik')" id="subtab-klinik" class="inline-block p-3 border-b-2 border-emerald-600 text-emerald-600 font-bold rounded-t-lg">Laboratorium Klinik</button>
+            </li>
+            <li class="mr-2">
+              <button onclick="switchHasilSubTab('lingkungan')" id="subtab-lingkungan" class="inline-block p-3 border-b-2 border-transparent text-slate-500 hover:text-slate-600 rounded-t-lg">Laboratorium Lingkungan</button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- INPUT HASIL LAB KLINIK -->
+        <div id="hasil-lab-klinik" class="space-y-4">
+          <table class="w-full text-sm border-collapse border border-slate-200">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="border p-2 text-left">Parameter Pemeriksaan</th>
+                <th class="border p-2 text-left">Hasil</th>
+                <th class="border p-2 text-left">Nilai Rujukan / Normal</th>
+                <th class="border p-2 text-left">Satuan</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-hasil-klinik"></tbody>
+          </table>
+          <div class="flex justify-end gap-3 mt-4">
+            <button onclick="simpanHasilLab('klinik')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-lg text-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Hasil Klinik</button>
+            <button onclick="cetakHasilLab('klinik')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg text-sm"><i class="fa-solid fa-print mr-1"></i> Cetak Hasil Klinik</button>
+          </div>
+        </div>
+
+        <!-- INPUT HASIL LAB LINGKUNGAN -->
+        <div id="hasil-lab-lingkungan" class="hidden space-y-4">
+          <table class="w-full text-sm border-collapse border border-slate-200">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="border p-2 text-left">Parameter Lingkungan</th>
+                <th class="border p-2 text-left">Hasil</th>
+                <th class="border p-2 text-left">Nilai Rujukan Standar</th>
+                <th class="border p-2 text-left">Satuan</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-hasil-lingkungan"></tbody>
+          </table>
+          <div class="flex justify-end gap-3 mt-4">
+            <button onclick="simpanHasilLab('lingkungan')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-lg text-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Hasil Lingkungan</button>
+            <button onclick="cetakHasilLab('lingkungan')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg text-sm"><i class="fa-solid fa-print mr-1"></i> Cetak Hasil Lingkungan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. KONSULTASI DOKTER & SURAT KETERANGAN -->
+    <section id="sec-konsultasi" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-md text-emerald-600 mr-2"></i> Konsultasi Dokter & Penerbitan Surat Keterangan</h2>
+        
+        <!-- Search Pasien Terdaftar untuk Konsultasi Dokter -->
+        <div class="flex flex-col md:flex-row gap-4 mb-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+          <div class="flex-1 relative">
+            <label class="block text-xs font-bold text-emerald-900 mb-1">Cari No. Lab / Nama Pasien Terdaftar:</label>
+            <div class="relative">
+              <input type="text" id="search-doc-pasien" onkeyup="cariPasienUntukDokter(this.value)" placeholder="Ketik No Lab atau Nama Pasien..." class="w-full border pl-9 pr-3 p-2 text-sm rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" autocomplete="off">
+              <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+            </div>
+            <div id="search-doc-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-300 rounded-lg shadow-2xl z-30 max-h-64 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+
+        <!-- Selected Patient Status Dokter -->
+        <div id="selected-patient-info-doc" class="hidden bg-emerald-50 border border-emerald-300 p-3 rounded-lg mb-4 text-xs flex justify-between">
+          <div><strong>No. Lab:</strong> <span id="lbl-doc-nolab">-</span> | <strong>Nama:</strong> <span id="lbl-doc-nama">-</span> | <strong>Umur/JK:</strong> <span id="lbl-doc-umur-jk">-</span></div>
+          <div><span class="bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded font-bold">Terpilih</span></div>
+        </div>
+
+        <!-- Tanda Vital -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+          <div>
+            <label class="block text-xs font-bold mb-1">Tekanan Darah</label>
+            <input type="text" id="doc-td" placeholder="120/80 mmHg" class="w-full border p-2 text-sm rounded">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">Berat Badan</label>
+            <input type="number" id="doc-bb" placeholder="65 kg" class="w-full border p-2 text-sm rounded">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">Tinggi Badan</label>
+            <input type="number" id="doc-tb" placeholder="170 cm" class="w-full border p-2 text-sm rounded">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">Suhu Tubuh</label>
+            <input type="text" id="doc-suhu" placeholder="36.5 °C" class="w-full border p-2 text-sm rounded">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">Nadi</label>
+            <input type="text" id="doc-nadi" placeholder="80 x/menit" class="w-full border p-2 text-sm rounded">
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="font-bold text-slate-700 text-sm">Pilih jenis Surat Keterangan:</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold mb-1">Jenis Surat</label>
+              <select id="doc-jenis-surat" class="w-full border p-2.5 text-sm rounded-lg">
+                <option value="Surat Keterangan Sehat">Surat Keterangan Sehat</option>
+                <option value="Surat Keterangan Sakit">Surat Keterangan Sakit</option>
+                <option value="Surat Keterangan Bebas Buta Warna">Surat Keterangan Bebas Buta Warna</option>
+                <option value="Surat Keterangan Bebas Narkoba">Surat Keterangan Bebas Narkoba</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Keperluan Surat *</label>
+              <input type="text" id="doc-keperluan" placeholder="Misal: Persyaratan Melamar Kerja / CPNS / Sekolah" class="w-full border p-2.5 text-sm rounded-lg" required>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-lg border space-y-2">
+            <p class="text-xs font-bold text-slate-600">Pejabat Penandatangan Surat Keterangan:</p>
+            <ul class="text-xs text-slate-700 list-disc list-inside space-y-1">
+              <li><strong>Dokter Pemeriksa:</strong> dr. SHINTASARI RACHMAWATI, M.H.Kes. (NIP. 197806052010012011)</li>
+              <li><strong>Kepala Labkesda Kab. Tasikmalaya:</strong> T. ALDYANSYAH, S.T, M.M (NIP. 197811252005011003)</li>
+            </ul>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button onclick="simpanKonsultasi()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg shadow"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Hasil Pemeriksaan</button>
+            <button onclick="cetakSuratKeterangan()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow"><i class="fa-solid fa-print mr-1"></i> Cetak Surat Keterangan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. REKAP & EDIT DATA HISTORY -->
+    <section id="sec-rekap" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 border-b pb-2 gap-4">
+          <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-database text-emerald-600 mr-2"></i> Rekapitulasi & Riwayat Data Pasien</h2>
+          <div class="flex flex-wrap gap-2 w-full md:w-auto items-center">
+            <!-- Filter Range Waktu -->
+            <div class="flex items-center gap-1 text-xs">
+              <input type="date" id="filter-tgl-mulai" class="border p-1.5 rounded" title="Dari Tanggal">
+              <span>s/d</span>
+              <input type="date" id="filter-tgl-selesai" class="border p-1.5 rounded" title="Sampai Tanggal">
+              <button onclick="renderTableRekap()" class="bg-slate-700 hover:bg-slate-800 text-white px-2.5 py-1.5 rounded font-bold"><i class="fa-solid fa-filter"></i></button>
+            </div>
+            <!-- Search Rekap Data -->
+            <div class="relative flex-1 md:w-48">
+              <input type="text" id="search-rekap" onkeyup="cariPasienRekap(this.value)" placeholder="Cari data..." class="w-full border p-1.5 text-xs rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" autocomplete="off">
+              <div id="search-rekap-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-300 rounded-lg shadow-2xl z-30 max-h-64 overflow-y-auto text-xs"></div>
+            </div>
+            <!-- Import & Export Buttons -->
+            <input type="file" id="import-file" class="hidden" accept=".json" onchange="importDataFromJSON(event)">
+            <button onclick="document.getElementById('import-file').click()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs whitespace-nowrap"><i class="fa-solid fa-file-import mr-1"></i> Impor Data</button>
+            <button onclick="exportToCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs whitespace-nowrap"><i class="fa-solid fa-file-excel mr-1"></i> Ekspor Semua</button>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <!-- REKAP LAB KLINIK -->
+          <div class="border rounded-lg overflow-hidden">
+            <div class="bg-emerald-100 px-4 py-3 font-bold text-emerald-800 flex justify-between items-center">
+              <span><i class="fa-solid fa-heart-pulse mr-2"></i> REKAP DATA LABORATORIUM KLINIK</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse border border-slate-200 text-left">
+                <thead class="bg-slate-100">
+                  <tr>
+                    <th class="border p-2">No. Lab</th>
+                    <th class="border p-2">Tgl Periksa</th>
+                    <th class="border p-2">NIK</th>
+                    <th class="border p-2">Nama Pasien</th>
+                    <th class="border p-2">L/P</th>
+                    <th class="border p-2">Dokter Pengirim</th>
+                    <th class="border p-2 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-rekap-klinik"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- REKAP LAB LINGKUNGAN -->
+          <div class="border rounded-lg overflow-hidden">
+            <div class="bg-blue-100 px-4 py-3 font-bold text-blue-800 flex justify-between items-center">
+              <span><i class="fa-solid fa-flask-vial mr-2"></i> REKAP DATA LABORATORIUM LINGKUNGAN</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse border border-slate-200 text-left">
+                <thead class="bg-slate-100">
+                  <tr>
+                    <th class="border p-2">No. Lab</th>
+                    <th class="border p-2">Tgl Pengiriman</th>
+                    <th class="border p-2">Identitas Pemohon</th>
+                    <th class="border p-2">Nama Perusahaan</th>
+                    <th class="border p-2">Alamat</th>
+                    <th class="border p-2 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-rekap-lingkungan"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= PRINT OUT TEMPLATE (TIMES NEW ROMAN 12PT) ================= -->
+  <div id="print-area" class="hidden">
+    <!-- Header Kop Surat Resmi -->
+    <div style="display: flex; align-items: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 15px;">
+      <img src="https://tasikmalayakab.go.id/wp-content/themes/tasikmalaya-theme/assets/images/tasikmalaya-crest.png" style="width: 75px; height: auto; margin-right: 15px;" alt="Logo Tasikmalaya">
+      <div style="text-align: center; flex: 1;">
+        <h3 style="margin: 0; font-size: 13pt; font-weight: bold; text-transform: uppercase;">PEMERINTAH DAERAH KABUPATEN TASIKMALAYA</h3>
+        <h2 style="margin: 0; font-size: 15pt; font-weight: bold; text-transform: uppercase;">DINAS KESEHATAN</h2>
+        <h3 style="margin: 0; font-size: 13pt; font-weight: bold; text-transform: uppercase;">LABORATORIUM KESEHATAN DAERAH (LABKESDA)</h3>
+        <p style="margin: 0; font-size: 9.5pt;">JL. Pancasila No. 27 Kota Tasikmalaya Telepon : (0265) 332723</p>
+        <p style="margin: 0; font-size: 9.5pt;">email : labkabtsm@gmail.com Kode Pos : 46111</p>
+      </div>
+    </div>
+
+    <!-- Dynamic Container for Printed Docs -->
+    <div id="print-dynamic-content"></div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // ------------------------------------------------------------------------
+    // DATABASE STORAGE
+    // ------------------------------------------------------------------------
+    let dbPasien = JSON.parse(localStorage.getItem('labkesda_tsm_db')) || [];
+    let activePatientId = null;
+
+    // Master Nilai Rujukan Standard
+    const masterReferenceKlinik = {
+      "URIN RUTIN": { ref: "Normal", unit: "-" },
+      "Hemoglobin": { min: 12.0, max: 16.0, ref: "12.0 - 16.0", unit: "g/dL" },
+      "Leukosit": { min: 4000, max: 10000, ref: "4.000 - 10.000", unit: "/µL" },
+      "Hitung jenis": { ref: "1/0/2/50/40/8", unit: "%" },
+      "Laju endap darah / BSE": { min: 0, max: 20, ref: "< 20", unit: "mm/jam" },
+      "Eritrosit": { min: 4.0, max: 5.5, ref: "4.0 - 5.5", unit: "juta/µL" },
+      "Trombosit": { min: 150000, max: 450000, ref: "150.000 - 450.000", unit: "/µL" },
+      "Hematokrit": { min: 37, max: 48, ref: "37 - 48", unit: "%" },
+      "Glukosa Puasa": { min: 70, max: 110, ref: "70 - 110", unit: "mg/dL" },
+      "Glukosa 2 jam PP": { min: 70, max: 140, ref: "< 140", unit: "mg/dL" },
+      "Glukosa sewaktu": { min: 70, max: 200, ref: "< 200", unit: "mg/dL" },
+      "Kolesterol": { min: 0, max: 200, ref: "< 200", unit: "mg/dL" },
+      "Trigliserida": { min: 0, max: 150, ref: "< 150", unit: "mg/dL" },
+      "HDL Direct": { min: 40, max: 100, ref: "> 40", unit: "mg/dL" },
+      "LDL Direct": { min: 0, max: 130, ref: "< 130", unit: "mg/dL" },
+      "Asam Urat": { min: 2.4, max: 7.0, ref: "2.4 - 7.0", unit: "mg/dL" },
+      "Ureum": { min: 15, max: 45, ref: "15 - 45", unit: "mg/dL" },
+      "Creatinin": { min: 0.6, max: 1.2, ref: "0.6 - 1.2", unit: "mg/dL" },
+      "SGOT": { min: 0, max: 35, ref: "< 35", unit: "U/L" },
+      "SGPT": { min: 0, max: 45, ref: "< 45", unit: "U/L" },
+      "Narkoba": { ref: "Negatif", unit: "-" }
+    };
+
+    const masterReferenceLingkungan = {
+      "Coliform Total": { ref: "0 / 100 ml", unit: "CFU/100ml" },
+      "Pemeriksaan Tinja": { ref: "Negatif", unit: "-" },
+      "TDS": { ref: "Maks 300", unit: "mg/L" },
+      "Kekeruhan": { ref: "Maks 3", unit: "NTU" },
+      "Kromium": { ref: "Maks 0.05", unit: "mg/L" },
+      "Suhu": { ref: "Suhu udara ± 3", unit: "°C" },
+      "Warna": { ref: "Maks 10", unit: "TCU" },
+      "Bau": { ref: "Tidak Berbau", unit: "-" },
+      "Besi (Fe)": { ref: "Maks 0.2", unit: "mg/L" },
+      "Mangan (Mn)": { ref: "Maks 0.1", unit: "mg/L" },
+      "Nitrat (NO3)": { ref: "Maks 20", unit: "mg/L" },
+      "Nitrit (NO2)": { ref: "Maks 3", unit: "mg/L" },
+      "pH Lingkungan": { ref: "6.5 - 8.5", unit: "-" },
+      "E. Coli Pangan": { ref: "Negatif", unit: "/gr" },
+      "Formalin": { ref: "Negatif", unit: "-" },
+      "Borax": { ref: "Negatif", unit: "-" },
+      "Rhodamin B": { ref: "Negatif", unit: "-" },
+      "Methanil Yellow": { ref: "Negatif", unit: "-" }
+    };
+
+    function handleSelectPtgLab(val) {
+      if (val === 'custom') {
+        document.getElementById('ptg-pemeriksa').value = '';
+        document.getElementById('ptg-nip-pemeriksa').value = '';
+        document.getElementById('ptg-pemeriksa').focus();
+      } else if (val) {
+        const parts = val.split('|');
+        document.getElementById('ptg-pemeriksa').value = parts[0] || '';
+        document.getElementById('ptg-nip-pemeriksa').value = parts[1] || '';
+      }
+    }
+
+    function handleSelectKepalaLab(val) {
+      if (val === 'custom') {
+        document.getElementById('kepala-lab').value = '';
+        document.getElementById('kepala-lab-nip').value = '';
+        document.getElementById('kepala-lab').focus();
+      } else if (val) {
+        const parts = val.split('|');
+        document.getElementById('kepala-lab').value = parts[0] || '';
+        document.getElementById('kepala-lab-nip').value = parts[1] || '';
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // AUTHENTICATION
+    // ------------------------------------------------------------------------
+    function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-username').value;
+      const p = document.getElementById('login-password').value;
+
+      if (u === 'admin1' && p === 'Saturnus2@') {
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('main-header').classList.remove('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        generateAutoNoLab();
+        renderTableRekap();
+      } else {
+        alert('Username atau Password salah!');
+      }
+    }
+
+    function handleLogout() {
+      document.getElementById('login-modal').classList.remove('hidden');
+      document.getElementById('main-header').classList.add('hidden');
+      document.getElementById('main-content').classList.add('hidden');
+    }
+
+    // ------------------------------------------------------------------------
+    // TAB NAVIGATION
+    // ------------------------------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(el => {
+        el.classList.remove('active', 'border-b-2', 'border-amber-400', 'text-white');
+        el.classList.add('text-emerald-200');
+      });
+
+      document.getElementById('sec-' + tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('tab-' + tabId);
+      activeBtn.classList.add('active', 'border-b-2', 'border-amber-400', 'text-white');
+      activeBtn.classList.remove('text-emerald-200');
+      if (tabId === 'rekap') renderTableRekap();
+    }
+
+    // ------------------------------------------------------------------------
+    // 1. ANTRIAN CALLER
+    // ------------------------------------------------------------------------
+    let currentQueue = 1;
+
+    function callQueue() {
+      const qNum = 'A-' + String(currentQueue).padStart(3, '0');
+      const loket = document.getElementById('antrian-loket').value;
+      document.getElementById('current-queue-num').innerText = qNum;
+
+      const text = `Nomor antrian ${qNum}, silahkan menuju ke ${loket}`;
+      
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = 'id-ID';
+        speech.rate = 0.85;
+        window.speechSynthesis.speak(speech);
+      } else {
+        alert("Fitur suara tidak didukung browser ini.");
+      }
+    }
+
+    function nextQueue() {
+      currentQueue++;
+      document.getElementById('current-queue-num').innerText = 'A-' + String(currentQueue).padStart(3, '0');
+    }
+
+    function prevQueue() {
+      if (currentQueue > 1) {
+        currentQueue--;
+        document.getElementById('current-queue-num').innerText = 'A-' + String(currentQueue).padStart(3, '0');
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // 2. FORM PENDAFTARAN & PENCARIAN PASIEN MULTI-HASIL
+    // ------------------------------------------------------------------------
+    function toggleSuratSelect(checked) {
+      const select = document.getElementById('p-jns-surat-req');
+      select.disabled = !checked;
+      if (checked) {
+        select.classList.remove('bg-slate-100');
+        select.classList.add('bg-white');
+      } else {
+        select.classList.add('bg-slate-100');
+        select.classList.remove('bg-white');
+      }
+    }
+
+    function generateAutoNoLab() {
+      const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'');
+      const count = dbPasien.length + 1;
+      document.getElementById('p-nolab').value = `LAB-${dateStr}-${String(count).padStart(3, '0')}`;
+    }
+
+    function hitungUmur() {
+      const tgl = new Date(document.getElementById('p-tgl-lahir').value);
+      if (!isNaN(tgl)) {
+        const diff = new Date(Date.now() - tgl.getTime());
+        const age = Math.abs(diff.getUTCFullYear() - 1970);
+        document.getElementById('p-umur').value = age + " Tahun";
+      }
+    }
+
+    function searchPasienRiwayat(query) {
+      const dropdown = document.getElementById('search-results-dropdown');
+      if (!dropdown) return;
+
+      const trimmed = query.trim().toLowerCase();
+      if (!trimmed) {
+        dropdown.innerHTML = '';
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      const matches = dbPasien.filter(p => 
+        (p.nik && p.nik.includes(trimmed)) || 
+        (p.nama && p.nama.toLowerCase().includes(trimmed))
+      );
+
+      let html = `
+        <div onclick="pilihPasienBaru()" class="p-2.5 hover:bg-emerald-100 cursor-pointer border-b text-emerald-800 font-bold flex items-center space-x-2 bg-emerald-50">
+          <i class="fa-solid fa-user-plus text-emerald-600"></i>
+          <span>+ Tambah Pasien / Pemohon Baru</span>
+        </div>
+      `;
+
+      if (matches.length > 0) {
+        matches.forEach(p => {
+          html += `
+            <div onclick="pilihPasienRiwayat(${p.id})" class="p-2.5 hover:bg-slate-100 cursor-pointer border-b flex justify-between items-center text-slate-700">
+              <div>
+                <div class="font-bold text-emerald-900">${p.nama} <span class="text-slate-500 font-normal">(${p.jk})</span></div>
+                <div class="text-[11px] text-slate-500">NIK: ${p.nik || '-'} | Tgl Lahir: ${p.tglLahir ? formatTanggalIndo(p.tglLahir) : '-'}</div>
+                <div class="text-[10px] text-amber-700 font-medium">Lab Terakhir: ${p.nolab} (${p.tglPeriksa ? formatTanggalIndo(p.tglPeriksa) : '-'})</div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+            </div>
+          `;
+        });
+      } else {
+        html += `
+          <div class="p-2.5 text-slate-400 italic text-center">
+            Tidak ditemukan pasien dengan NIK / nama tersebut.
+          </div>
+        `;
+      }
+
+      dropdown.innerHTML = html;
+      dropdown.classList.remove('hidden');
+    }
+
+    function pilihPasienRiwayat(id) {
+      const p = dbPasien.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById('edit-patient-id').value = ''; 
+      document.getElementById('p-nik').value = p.nik || '';
+      document.getElementById('p-nama').value = p.nama || '';
+      document.getElementById('p-perusahaan').value = p.perusahaan || '';
+      document.getElementById('p-jk').value = p.jk || 'Laki-laki';
+      document.getElementById('p-tmpt-lahir').value = p.tmptLahir || '';
+      document.getElementById('p-tgl-lahir').value = p.tglLahir || '';
+      document.getElementById('p-umur').value = p.umur || '';
+      document.getElementById('p-alamat').value = p.alamat || '';
+      document.getElementById('p-nohp').value = p.nohp || '';
+
+      generateAutoNoLab();
+
+      document.getElementById('search-results-dropdown').classList.add('hidden');
+      document.getElementById('search-pendaftaran').value = p.nama;
+    }
+
+    function pilihPasienBaru() {
+      document.getElementById('edit-patient-id').value = '';
+      document.getElementById('p-nik').value = '';
+      document.getElementById('p-nama').value = '';
+      document.getElementById('p-perusahaan').value = '';
+      document.getElementById('p-jk').value = 'Laki-laki';
+      document.getElementById('p-tmpt-lahir').value = '';
+      document.getElementById('p-tgl-lahir').value = '';
+      document.getElementById('p-umur').value = '';
+      document.getElementById('p-alamat').value = '';
+      document.getElementById('p-nohp').value = '';
+
+      generateAutoNoLab();
+
+      document.getElementById('search-results-dropdown').classList.add('hidden');
+      document.getElementById('search-pendaftaran').value = '';
+      document.getElementById('p-nik').focus();
+    }
+
+    function savePendaftaran(e) {
+      e.preventDefault();
+
+      const editId = document.getElementById('edit-patient-id').value;
+      const klinikChecked = Array.from(document.querySelectorAll('input[name="klinik"]:checked')).map(cb => cb.value);
+      const lingkunganChecked = Array.from(document.querySelectorAll('input[name="lingkungan"]:checked')).map(cb => cb.value);
+
+      const reqKonsultasi = document.getElementById('req-konsultasi').checked;
+      const reqSurat = document.getElementById('req-surat').checked;
+      const reqJnsSurat = reqSurat ? document.getElementById('p-jns-surat-req').value : '';
+
+      if (editId) {
+        const idx = dbPasien.findIndex(x => x.id === parseInt(editId));
+        if (idx !== -1) {
+          dbPasien[idx].nik = document.getElementById('p-nik').value;
+          dbPasien[idx].nama = document.getElementById('p-nama').value;
+          dbPasien[idx].perusahaan = document.getElementById('p-perusahaan').value;
+          dbPasien[idx].jk = document.getElementById('p-jk').value;
+          dbPasien[idx].tmptLahir = document.getElementById('p-tmpt-lahir').value;
+          dbPasien[idx].tglLahir = document.getElementById('p-tgl-lahir').value;
+          dbPasien[idx].umur = document.getElementById('p-umur').value;
+          dbPasien[idx].alamat = document.getElementById('p-alamat').value;
+          dbPasien[idx].nohp = document.getElementById('p-nohp').value;
+          dbPasien[idx].tglMinta = document.getElementById('p-tgl-minta').value;
+          dbPasien[idx].tglPeriksa = document.getElementById('p-tgl-periksa').value;
+          dbPasien[idx].dokterPengirim = document.getElementById('p-dokter-pengirim').value;
+          dbPasien[idx].jnsSpesimen = document.getElementById('p-jns-spesimen').value;
+          dbPasien[idx].btkSpesimen = document.getElementById('p-btk-spesimen').value;
+          dbPasien[idx].kndSpesimen = document.getElementById('p-knd-spesimen').value;
+          dbPasien[idx].volSpesimen = document.getElementById('p-vol-spesimen').value;
+          dbPasien[idx].waktuAmbil = document.getElementById('p-waktu-ambil').value;
+          dbPasien[idx].waktuPeriksa = document.getElementById('p-waktu-periksa').value;
+          dbPasien[idx].waktuSelesai = document.getElementById('p-waktu-selesai').value;
+          dbPasien[idx].ptgSampling = document.getElementById('ptg-sampling').value;
+          dbPasien[idx].ptgPenerima = document.getElementById('ptg-penerima').value;
+          dbPasien[idx].ptgPemeriksa = document.getElementById('ptg-pemeriksa').value;
+          dbPasien[idx].ptgNipPemeriksa = document.getElementById('ptg-nip-pemeriksa').value;
+          dbPasien[idx].kepalaLab = document.getElementById('kepala-lab').value;
+          dbPasien[idx].kepalaLabNip = document.getElementById('kepala-lab-nip').value;
+          dbPasien[idx].ptgVerifikator = document.getElementById('ptg-verifikator').value;
+          dbPasien[idx].ptgValidasi = document.getElementById('ptg-validasi').value;
+          dbPasien[idx].klinikTests = klinikChecked;
+          dbPasien[idx].lingkunganTests = lingkunganChecked;
+          dbPasien[idx].reqKonsultasi = reqKonsultasi;
+          dbPasien[idx].reqSurat = reqSurat;
+          dbPasien[idx].reqJnsSurat = reqJnsSurat;
+
+          localStorage.setItem('labkesda_tsm_db', JSON.stringify(dbPasien));
+          alert('Data Pasien Berhasil Diperbarui!');
+          document.getElementById('edit-patient-id').value = '';
+          document.getElementById('form-pendaftaran-main').reset();
+          toggleSuratSelect(false);
+          document.getElementById('ptg-sampling').value = "Arif Rahman";
+          generateAutoNoLab();
+          renderTableRekap();
+          return;
+        }
+      }
+
+      const data = {
+        id: Date.now(),
+        nolab: document.getElementById('p-nolab').value,
+        nik: document.getElementById('p-nik').value,
+        nama: document.getElementById('p-nama').value,
+        perusahaan: document.getElementById('p-perusahaan').value,
+        jk: document.getElementById('p-jk').value,
+        tmptLahir: document.getElementById('p-tmpt-lahir').value,
+        tglLahir: document.getElementById('p-tgl-lahir').value,
+        umur: document.getElementById('p-umur').value,
+        alamat: document.getElementById('p-alamat').value,
+        nohp: document.getElementById('p-nohp').value,
+        tglMinta: document.getElementById('p-tgl-minta').value,
+        tglPeriksa: document.getElementById('p-tgl-periksa').value,
+        dokterPengirim: document.getElementById('p-dokter-pengirim').value,
+        jnsSpesimen: document.getElementById('p-jns-spesimen').value,
+        btkSpesimen: document.getElementById('p-btk-spesimen').value,
+        kndSpesimen: document.getElementById('p-knd-spesimen').value,
+        volSpesimen: document.getElementById('p-vol-spesimen').value,
+        waktuAmbil: document.getElementById('p-waktu-ambil').value,
+        waktuPeriksa: document.getElementById('p-waktu-periksa').value,
+        waktuSelesai: document.getElementById('p-waktu-selesai').value,
+        ptgSampling: document.getElementById('ptg-sampling').value || 'Arif Rahman',
+        ptgPenerima: document.getElementById('ptg-penerima').value,
+        ptgPemeriksa: document.getElementById('ptg-pemeriksa').value,
+        ptgNipPemeriksa: document.getElementById('ptg-nip-pemeriksa').value,
+        kepalaLab: document.getElementById('kepala-lab').value,
+        kepalaLabNip: document.getElementById('kepala-lab-nip').value,
+        ptgVerifikator: document.getElementById('ptg-verifikator').value,
+        ptgValidasi: document.getElementById('ptg-validasi').value,
+        klinikTests: klinikChecked,
+        lingkunganTests: lingkunganChecked,
+        reqKonsultasi: reqKonsultasi,
+        reqSurat: reqSurat,
+        reqJnsSurat: reqJnsSurat,
+        hasilKlinik: {},
+        hasilLingkungan: {}
+      };
+
+      dbPasien.push(data);
+      localStorage.setItem('labkesda_tsm_db', JSON.stringify(dbPasien));
+      activePatientId = data.id;
+      alert('Data Pendaftaran Berhasil Disimpan!');
+      document.getElementById('form-pendaftaran-main').reset();
+      toggleSuratSelect(false);
+      document.getElementById('ptg-sampling').value = "Arif Rahman";
+      generateAutoNoLab();
+      renderTableRekap();
+    }
+
+    function formatTanggalIndo(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+      return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    // ------------------------------------------------------------------------
+    // CETAK BUKTI PENDAFTARAN
+    // ------------------------------------------------------------------------
+    function cetakBuktiPendaftaran() {
+      const p = dbPasien.find(x => x.id === activePatientId) || dbPasien[dbPasien.length - 1];
+      if (!p) return alert('Silahkan simpan pendaftaran terlebih dahulu!');
+
+      let layananDokterHtml = '';
+      if (p.reqKonsultasi || p.reqSurat) {
+        const reqs = [];
+        if (p.reqKonsultasi) reqs.push("Konsultasi Dokter");
+        if (p.reqSurat) reqs.push(`Penerbitan ${p.reqJnsSurat}`);
+        layananDokterHtml = `<li><b>Layanan Dokter/Surat:</b> ${reqs.join(', ')}</li>`;
+      }
+
+      const printHtml = `
+        <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 15px; font-size: 13pt;">
+          BUKTI REGISTRASI PENDAFTARAN SAMPEL / PASIEN
+        </div>
+        
+        <table class="table-info">
+          <tr>
+            <td style="width:20%;">No. Lab</td>
+            <td style="width:30%;">: <b>${p.nolab}</b></td>
+            <td style="width:20%;">Tgl Permintaan</td>
+            <td style="width:30%;">: ${formatTanggalIndo(p.tglMinta)}</td>
+          </tr>
+          <tr>
+            <td>Nama Pasien/Pemohon</td>
+            <td>: ${p.nama}</td>
+            <td>Tgl Pemeriksaan</td>
+            <td>: ${formatTanggalIndo(p.tglPeriksa)}</td>
+          </tr>
+          <tr>
+            <td>NIK / Umur / JK</td>
+            <td>: ${p.nik} / ${p.umur} / ${p.jk}</td>
+            <td>Dokter Pengirim</td>
+            <td>: ${p.dokterPengirim || '-'}</td>
+          </tr>
+          <tr>
+            <td>Alamat</td>
+            <td>: ${p.alamat}</td>
+            <td>Jenis Spesimen</td>
+            <td>: ${p.jnsSpesimen || '-'} (${p.volSpesimen || '-'})</td>
+          </tr>
+        </table>
+
+        <div style="font-weight: bold; margin-top: 10px; margin-bottom: 5px;">Permintaan Layanan / Pemeriksaan:</div>
+        <ul style="margin-top: 0; padding-left: 20px;">
+          ${p.klinikTests && p.klinikTests.length ? `<li><b>Lab Klinik:</b> ${p.klinikTests.join(', ')}</li>` : ''}
+          ${p.lingkunganTests && p.lingkunganTests.length ? `<li><b>Lab Lingkungan:</b> ${p.lingkunganTests.join(', ')}</li>` : ''}
+          ${layananDokterHtml}
+        </ul>
+
+        <div style="font-weight: bold; margin-top: 25px; margin-bottom: 8px;">Daftar Petugas Penanggung Jawab:</div>
+        <table class="table-bordered" style="width: 100%; text-align: center; font-size: 10pt;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="width: 20%; text-align: center;">Pendaftaran</th>
+              <th style="width: 20%; text-align: center;">Penerima Sampel</th>
+              <th style="width: 20%; text-align: center;">Pemeriksa</th>
+              <th style="width: 20%; text-align: center;">Verifikator</th>
+              <th style="width: 20%; text-align: center;">Validasi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="height: 45px; vertical-align: bottom;"><b>${p.ptgSampling || 'Arif Rahman'}</b></td>
+              <td style="height: 45px; vertical-align: bottom;"><b>${p.ptgPenerima || '-'}</b></td>
+              <td style="height: 45px; vertical-align: bottom;"><b>${p.ptgPemeriksa || '-'}</b></td>
+              <td style="height: 45px; vertical-align: bottom;"><b>${p.ptgVerifikator || '-'}</b></td>
+              <td style="height: 45px; vertical-align: bottom;"><b>${p.ptgValidasi || '-'}</b></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table class="table-ttd" style="margin-top: 30px; width: 100%;">
+          <tr>
+            <td style="width: 50%;"></td>
+            <td style="width: 50%; text-align: center; vertical-align: top;">
+              <p style="margin: 0;">Tasikmalaya, ${formatTanggalIndo(new Date())}</p>
+              <p style="margin: 0;">Petugas Pendaftaran,</p>
+              <div style="height: 55px;"></div>
+              <p style="text-decoration: underline; font-weight: bold; margin: 0;">${p.ptgSampling || 'Arif Rahman'}</p>
+            </td>
+          </tr>
+        </table>
+      `;
+
+      document.getElementById('print-dynamic-content').innerHTML = printHtml;
+      setTimeout(() => { window.print(); }, 200);
+    }
+
+    // ------------------------------------------------------------------------
+    // 3. INPUT HASIL LAB (KLINIK & LINGKUNGAN)
+    // ------------------------------------------------------------------------
+    function cariPasienUntukHasil(query) {
+      const dropdown = document.getElementById('search-hasil-dropdown');
+      const trimmed = query.trim().toLowerCase();
+      
+      if (!trimmed) {
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+        return;
+      }
+
+      const matches = dbPasien.filter(x => 
+        x.nolab.toLowerCase().includes(trimmed) || 
+        x.nama.toLowerCase().includes(trimmed) ||
+        (x.nik && x.nik.includes(trimmed))
+      );
+
+      if (dropdown) {
+        if (matches.length > 0) {
+          let html = '';
+          matches.forEach(p => {
+            html += `
+              <div onclick="pilihPasienHasil(${p.id})" class="p-2.5 hover:bg-amber-100 cursor-pointer border-b flex justify-between items-center text-slate-700">
+                <div>
+                  <div class="font-bold text-amber-900">${p.nama} <span class="text-slate-500 font-normal">(${p.jk})</span></div>
+                  <div class="text-[11px] text-slate-500">No. Lab: <b>${p.nolab}</b> | NIK: ${p.nik || '-'} | Tgl Periksa: ${p.tglPeriksa ? formatTanggalIndo(p.tglPeriksa) : '-'}</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+              </div>
+            `;
+          });
+          dropdown.innerHTML = html;
+          dropdown.classList.remove('hidden');
+        } else {
+          dropdown.innerHTML = '<div class="p-2.5 text-slate-400 italic text-center">Data pasien tidak ditemukan.</div>';
+          dropdown.classList.remove('hidden');
+        }
+      }
+    }
+
+    function pilihPasienHasil(id) {
+      const p = dbPasien.find(x => x.id === id);
+      if (!p) return;
+      activePatientId = p.id;
+      document.getElementById('selected-patient-info').classList.remove('hidden');
+      document.getElementById('lbl-nolab').innerText = p.nolab;
+      document.getElementById('lbl-nama').innerText = p.nama;
+      document.getElementById('lbl-umur-jk').innerText = `${p.umur} / ${p.jk}`;
+      document.getElementById('search-hasil-pasien').value = `${p.nolab} - ${p.nama}`;
+
+      const dropdown = document.getElementById('search-hasil-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+
+      renderFormHasil(p);
+    }
+
+    function renderFormHasil(p) {
+      const tbodyKlinik = document.getElementById('tbody-hasil-klinik');
+      tbodyKlinik.innerHTML = '';
+      (p.klinikTests || []).forEach(test => {
+        const ref = masterReferenceKlinik[test] || { ref: '-', unit: '-' };
+        const val = p.hasilKlinik[test] || '';
+        tbodyKlinik.innerHTML += `
+          <tr>
+            <td class="border p-2 font-semibold">${test}</td>
+            <td class="border p-2"><input type="text" id="hk-${test}" value="${val}" class="border p-1 w-full rounded"></td>
+            <td class="border p-2">${ref.ref}</td>
+            <td class="border p-2">${ref.unit}</td>
+          </tr>
+        `;
+      });
+
+      const tbodyLingkungan = document.getElementById('tbody-hasil-lingkungan');
+      tbodyLingkungan.innerHTML = '';
+      (p.lingkunganTests || []).forEach(test => {
+        const ref = masterReferenceLingkungan[test] || { ref: '-', unit: '-' };
+        const val = p.hasilLingkungan[test] || '';
+        tbodyLingkungan.innerHTML += `
+          <tr>
+            <td class="border p-2 font-semibold">${test}</td>
+            <td class="border p-2"><input type="text" id="hl-${test}" value="${val}" class="border p-1 w-full rounded"></td>
+            <td class="border p-2">${ref.ref}</td>
+            <td class="border p-2">${ref.unit}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function switchHasilSubTab(type) {
+      if (type === 'klinik') {
+        document.getElementById('hasil-lab-klinik').classList.remove('hidden');
+        document.getElementById('hasil-lab-lingkungan').classList.add('hidden');
+        document.getElementById('subtab-klinik').className = "inline-block p-3 border-b-2 border-emerald-600 text-emerald-600 font-bold rounded-t-lg";
+        document.getElementById('subtab-lingkungan').className = "inline-block p-3 border-b-2 border-transparent text-slate-500 hover:text-slate-600 rounded-t-lg";
+      } else {
+        document.getElementById('hasil-lab-klinik').classList.add('hidden');
+        document.getElementById('hasil-lab-lingkungan').classList.remove('hidden');
+        document.getElementById('subtab-lingkungan').className = "inline-block p-3 border-b-2 border-emerald-600 text-emerald-600 font-bold rounded-t-lg";
+        document.getElementById('subtab-klinik').className = "inline-block p-3 border-b-2 border-transparent text-slate-500 hover:text-slate-600 rounded-t-lg";
+      }
+    }
+
+    function simpanHasilLab(type) {
+      const p = dbPasien.find(x => x.id === activePatientId);
+      if (!p) return alert('Pilih pasien terlebih dahulu!');
+
+      if (type === 'klinik') {
+        p.klinikTests.forEach(test => {
+          const el = document.getElementById(`hk-${test}`);
+          if (el) p.hasilKlinik[test] = el.value;
+        });
+      } else {
+        p.lingkunganTests.forEach(test => {
+          const el = document.getElementById(`hl-${test}`);
+          if (el) p.hasilLingkungan[test] = el.value;
+        });
+      }
+
+      localStorage.setItem('labkesda_tsm_db', JSON.stringify(dbPasien));
+      alert(`Hasil Laboratorium ${type.toUpperCase()} Berhasil Disimpan!`);
+    }
+
+    function cetakHasilLab(type) {
+      const p = dbPasien.find(x => x.id === activePatientId);
+      if (!p) return alert('Pilih pasien terlebih dahulu!');
+
+      const isKlinik = type === 'klinik';
+      const tests = isKlinik ? (p.klinikTests || []) : (p.lingkunganTests || []);
+      const hasilObj = isKlinik ? p.hasilKlinik : p.hasilLingkungan;
+      const refMaster = isKlinik ? masterReferenceKlinik : masterReferenceLingkungan;
+
+      if (!tests.length) return alert(`Tidak ada pemeriksaan ${type.toUpperCase()} yang dipilih untuk pasien ini.`);
+
+      let rowsHtml = '';
+      tests.forEach(test => {
+        const val = hasilObj[test] || '-';
+        const ref = refMaster[test] || { ref: '-', unit: '-' };
+        
+        let flagBintang = '';
+        if (ref.min !== undefined && ref.max !== undefined) {
+          const numVal = parseFloat(val);
+          if (!isNaN(numVal) && (numVal < ref.min || numVal > ref.max)) {
+            flagBintang = ' *';
+          }
+        }
+
+        rowsHtml += `
+          <tr>
+            <td>${test}</td>
+            <td><b>${val}${flagBintang}</b></td>
+            <td>${ref.ref}</td>
+            <td>${ref.unit}</td>
+          </tr>
+        `;
+      });
+
+      const ptgNama = isKlinik
+        ? (p.ptgPemeriksa || 'MIRWAN SETIAWAN, S.ST.')
+        : 'ELIS HENI HERYANI, A.Md, S.KM.';
+      const ptgNip = isKlinik
+        ? (p.ptgNipPemeriksa || '198112272009021001')
+        : '197703282011012001';
+      const kepalaNama = p.kepalaLab || 'T. ALDYANSYAH, S.T, M.M';
+      const kepalaNip = p.kepalaLabNip || '197811252005011003';
+
+      const printHtml = `
+        <div style="text-align: center; font-weight: bold; font-size: 13pt; text-decoration: underline; margin-bottom: 15px;">
+          HASIL PEMERIKSAAN LABORATORIUM ${type.toUpperCase()}
+        </div>
+
+        ${isKlinik ? `
+        <table class="table-info">
+          <tr>
+            <td style="width:18%;">No. Lab</td>
+            <td style="width:32%;">: <b>${p.nolab}</b></td>
+            <td style="width:18%;">Tgl Periksa</td>
+            <td style="width:32%;">: ${formatTanggalIndo(p.tglPeriksa)}</td>
+          </tr>
+          <tr>
+            <td>Nama Pasien</td>
+            <td>: ${p.nama}</td>
+            <td>Dokter Pengirim</td>
+            <td>: ${p.dokterPengirim || '-'}</td>
+          </tr>
+          <tr>
+            <td>Umur / JK</td>
+            <td>: ${p.umur} / ${p.jk}</td>
+            <td>Spesimen</td>
+            <td>: ${p.jnsSpesimen || '-'}</td>
+          </tr>
+          <tr>
+            <td>Alamat</td>
+            <td>: ${p.alamat}</td>
+            <td>Kondisi Spesimen</td>
+            <td>: ${p.kndSpesimen || 'Baik'}</td>
+          </tr>
+        </table>
+        ` : `
+        <table class="table-info">
+          <tr>
+            <td style="width:20%;">No. Lab</td>
+            <td style="width:80%;">: <b>${p.nolab}</b></td>
+          </tr>
+          <tr>
+            <td>Identitas Pemohon</td>
+            <td>: ${p.nama || '-'}</td>
+          </tr>
+          <tr>
+            <td>Nama Perusahaan</td>
+            <td>: ${p.perusahaan || '-'}</td>
+          </tr>
+          <tr>
+            <td>Alamat</td>
+            <td>: ${p.alamat || '-'}</td>
+          </tr>
+          <tr>
+            <td>Tanggal Pengiriman</td>
+            <td>: ${formatTanggalIndo(p.tglMinta)}</td>
+          </tr>
+          <tr>
+            <td>Tanggal Pemeriksaan Sampel</td>
+            <td>: ${formatTanggalIndo(p.tglPeriksa)}</td>
+          </tr>
+        </table>
+        `}
+
+        <table class="table-bordered">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="text-align:left; width:35%;">Parameter Pemeriksaan</th>
+              <th style="text-align:left; width:25%;">Hasil Pemeriksaan</th>
+              <th style="text-align:left; width:25%;">Nilai Rujukan</th>
+              <th style="text-align:left; width:15%;">Satuan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+        <p style="font-size: 9pt; margin-top: 5px; margin-bottom: 15px;"><i>(*) Menandakan nilai di luar rujukan normal.</i></p>
+
+        <!-- TANDA TANGAN SEJAJAR (KIRI: PETUGAS LAB, KANAN: KEPALA LABKESDA) -->
+        <table class="table-ttd" style="margin-top: 30px; width: 100%;">
+          <tr>
+            <td style="width: 50%; text-align: center; vertical-align: top;">
+              <p style="margin: 0;">&nbsp;</p>
+              <p style="margin: 0;">Petugas Laboratorium,</p>
+              <div style="height: 55px;"></div>
+              <p style="text-decoration: underline; font-weight: bold; margin: 0;">${ptgNama}</p>
+              <p style="margin: 0;">${ptgNip ? 'NIP. ' + ptgNip : ''}</p>
+            </td>
+            <td style="width: 50%; text-align: center; vertical-align: top;">
+              <p style="margin: 0;">Tasikmalaya, ${formatTanggalIndo(new Date())}</p>
+              <p style="margin: 0;">Kepala Labkesda Kab. Tasikmalaya,</p>
+              <div style="height: 55px;"></div>
+              <p style="text-decoration: underline; font-weight: bold; margin: 0;">${kepalaNama}</p>
+              <p style="margin: 0;">${kepalaNip ? 'NIP. ' + kepalaNip : ''}</p>
+            </td>
+          </tr>
+        </table>
+      `;
+
+      document.getElementById('print-dynamic-content').innerHTML = printHtml;
+      setTimeout(() => { window.print(); }, 200);
+    }
+
+    // ------------------------------------------------------------------------
+    // 4. KONSULTASI DOKTER & SURAT KETERANGAN
+    // ------------------------------------------------------------------------
+    function cariPasienUntukDokter(query) {
+      const dropdown = document.getElementById('search-doc-dropdown');
+      const trimmed = query.trim().toLowerCase();
+
+      if (!trimmed) {
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+        return;
+      }
+
+      const matches = dbPasien.filter(x => 
+        x.nolab.toLowerCase().includes(trimmed) || 
+        x.nama.toLowerCase().includes(trimmed) ||
+        (x.nik && x.nik.includes(trimmed))
+      );
+
+      if (dropdown) {
+        if (matches.length > 0) {
+          let html = '';
+          matches.forEach(p => {
+            html += `
+              <div onclick="pilihPasienDokter(${p.id})" class="p-2.5 hover:bg-emerald-100 cursor-pointer border-b flex justify-between items-center text-slate-700">
+                <div>
+                  <div class="font-bold text-emerald-900">${p.nama} <span class="text-slate-500 font-normal">(${p.jk})</span></div>
+                  <div class="text-[11px] text-slate-500">No. Lab: <b>${p.nolab}</b> | NIK: ${p.nik || '-'} | Tgl Periksa: ${p.tglPeriksa ? formatTanggalIndo(p.tglPeriksa) : '-'}</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+              </div>
+            `;
+          });
+          dropdown.innerHTML = html;
+          dropdown.classList.remove('hidden');
+        } else {
+          dropdown.innerHTML = '<div class="p-2.5 text-slate-400 italic text-center">Data pasien tidak ditemukan.</div>';
+          dropdown.classList.remove('hidden');
+        }
+      }
+    }
+
+    function pilihPasienDokter(id) {
+      const p = dbPasien.find(x => x.id === id);
+      if (!p) return;
+      activePatientId = p.id;
+      document.getElementById('selected-patient-info-doc').classList.remove('hidden');
+      document.getElementById('lbl-doc-nolab').innerText = p.nolab;
+      document.getElementById('lbl-doc-nama').innerText = p.nama;
+      document.getElementById('lbl-doc-umur-jk').innerText = `${p.umur} / ${p.jk}`;
+      document.getElementById('search-doc-pasien').value = `${p.nolab} - ${p.nama}`;
+
+      if (p.reqJnsSurat) {
+        document.getElementById('doc-jenis-surat').value = p.reqJnsSurat;
+      }
+
+      if (p.vitals) {
+        document.getElementById('doc-td').value = p.vitals.td || '';
+        document.getElementById('doc-bb').value = p.vitals.bb || '';
+        document.getElementById('doc-tb').value = p.vitals.tb || '';
+        document.getElementById('doc-suhu').value = p.vitals.suhu || '';
+        document.getElementById('doc-nadi').value = p.vitals.nadi || '';
+      } else {
+        document.getElementById('doc-td').value = '';
+        document.getElementById('doc-bb').value = '';
+        document.getElementById('doc-tb').value = '';
+        document.getElementById('doc-suhu').value = '';
+        document.getElementById('doc-nadi').value = '';
+      }
+
+      if (p.konsultasiKeperluan) {
+        document.getElementById('doc-keperluan').value = p.konsultasiKeperluan;
+      } else {
+        document.getElementById('doc-keperluan').value = '';
+      }
+
+      const dropdown = document.getElementById('search-doc-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+    }
+
+    function simpanKonsultasi() {
+      const p = dbPasien.find(x => x.id === activePatientId);
+      if (!p) return alert('Silahkan pilih pasien terlebih dahulu pada pencarian konsultasi!');
+
+      p.vitals = {
+        td: document.getElementById('doc-td').value,
+        bb: document.getElementById('doc-bb').value,
+        tb: document.getElementById('doc-tb').value,
+        suhu: document.getElementById('doc-suhu').value,
+        nadi: document.getElementById('doc-nadi').value
+      };
+      p.konsultasiJenisSurat = document.getElementById('doc-jenis-surat').value;
+      p.konsultasiKeperluan = document.getElementById('doc-keperluan').value;
+
+      localStorage.setItem('labkesda_tsm_db', JSON.stringify(dbPasien));
+      alert('Hasil pemeriksaan konsultasi dan tanda vital berhasil disimpan!');
+      renderTableRekap();
+    }
+
+    function cetakSuratKeterangan() {
+      const p = dbPasien.find(x => x.id === activePatientId) || dbPasien[dbPasien.length - 1];
+      if (!p) return alert('Silahkan pilih pasien terlebih dahulu!');
+
+      const jenisSurat = document.getElementById('doc-jenis-surat').value;
+      const keperluan = document.getElementById('doc-keperluan').value;
+      const td = document.getElementById('doc-td').value || '-';
+      const bb = document.getElementById('doc-bb').value || '-';
+      const tb = document.getElementById('doc-tb').value || '-';
+      const suhu = document.getElementById('doc-suhu').value || '-';
+      const nadi = document.getElementById('doc-nadi').value || '-';
+
+      if (!keperluan) return alert('Kolom Keperluan Surat wajib diisi!');
+
+      const kepalaNama = p.kepalaLab || 'T. ALDYANSYAH, S.T, M.M';
+      const kepalaNip = p.kepalaLabNip || '197811252005011003';
+
+      const printHtml = `
+        <div style="text-align: center; font-weight: bold; font-size: 14pt; text-decoration: underline; text-transform: uppercase; margin-bottom: 5px;">
+          ${jenisSurat}
+        </div>
+        <div style="text-align: center; margin-bottom: 20px;">Nomor: 440 / ${Math.floor(100 + Math.random() * 900)} / LABKESDA / ${new Date().getFullYear()}</div>
+
+        <p style="text-align: justify; line-height: 1.5;">Yang bertanda tangan di bawah ini Dokter Pemeriksa Laboratorium Kesehatan Daerah Kabupaten Tasikmalaya, menerangkan bahwa:</p>
+
+        <table class="table-info" style="margin-left: 15px; width: 95%;">
+          <tr><td style="width:30%;">Nama Lengkap</td><td>: <b>${p.nama}</b></td></tr>
+          <tr><td>NIK</td><td>: ${p.nik}</td></tr>
+          <tr><td>Tempat, Tanggal Lahir</td><td>: ${p.tmptLahir || '-'}, ${formatTanggalIndo(p.tglLahir)}</td></tr>
+          <tr><td>Jenis Kelamin</td><td>: ${p.jk}</td></tr>
+          <tr><td>Alamat</td><td>: ${p.alamat}</td></tr>
+        </table>
+
+        <p style="margin-top: 15px;">Hasil Pemeriksaan Fisik / Vital Sign:</p>
+        <table class="table-info" style="margin-left: 15px; width: 80%;">
+          <tr><td style="width:40%;">Tekanan Darah</td><td>: ${td} mmHg</td><td style="width:20%;">Suhu Tubuh</td><td>: ${suhu}</td></tr>
+          <tr><td>Berat Badan</td><td>: ${bb} kg</td><td>Nadi</td><td>: ${nadi}</td></tr>
+          <tr><td>Tinggi Badan</td><td>: ${tb} cm</td><td></td><td></td></tr>
+        </table>
+
+        <p style="text-align: justify; line-height: 1.5; margin-top: 15px;">
+          Berdasarkan hasil pemeriksaan medis yang dilakukan, dinyatakan bahwa yang bersangkutan dalam kondisi <b>SEHAT / LAYAK</b> dan Surat Keterangan ini dipergunakan untuk keperluan: <b>${keperluan}</b>.
+        </p>
+
+        <p style="margin-top: 15px;">Demikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
+
+        <table class="table-ttd" style="margin-top: 40px; width: 100%;">
+          <tr>
+            <td style="width: 50%; text-align: center; vertical-align: top;">
+              <p style="margin: 0;">Mengetahui,</p>
+              <p style="margin: 0;">Kepala Labkesda Kab. Tasikmalaya,</p>
+              <div style="height: 50px;"></div>
+              <p style="text-decoration: underline; font-weight: bold; margin: 0;">${kepalaNama}</p>
+              <p style="margin: 0;">${kepalaNip ? 'NIP. ' + kepalaNip : ''}</p>
+            </td>
+            <td style="width: 50%; text-align: center; vertical-align: top;">
+              <p style="margin: 0;">Tasikmalaya, ${formatTanggalIndo(new Date())}</p>
+              <p style="margin: 0;">Dokter Pemeriksa,</p>
+              <div style="height: 50px;"></div>
+              <p style="text-decoration: underline; font-weight: bold; margin: 0;">dr. SHINTASARI RACHMAWATI, M.H.Kes.</p>
+              <p style="margin: 0;">NIP. 197806052010012011</p>
+            </td>
+          </tr>
+        </table>
+      `;
+
+      document.getElementById('print-dynamic-content').innerHTML = printHtml;
+      setTimeout(() => { window.print(); }, 200);
+    }
+
+    // ------------------------------------------------------------------------
+    // 5. REKAP, EDIT, EKSPOR & IMPOR DATA
+    // ------------------------------------------------------------------------
+    function cariPasienRekap(query) {
+      renderTableRekap(query);
+      const dropdown = document.getElementById('search-rekap-dropdown');
+      const trimmed = query.trim().toLowerCase();
+
+      if (!trimmed) {
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+        return;
+      }
+
+      const matches = dbPasien.filter(x => 
+        x.nama.toLowerCase().includes(trimmed) || 
+        x.nolab.toLowerCase().includes(trimmed) ||
+        (x.nik && x.nik.includes(trimmed))
+      );
+
+      if (dropdown) {
+        if (matches.length > 0) {
+          let html = '';
+          matches.forEach(p => {
+            html += `
+              <div onclick="pilihPasienRekap('${p.nolab}')" class="p-2.5 hover:bg-slate-100 cursor-pointer border-b flex justify-between items-center text-slate-700">
+                <div>
+                  <div class="font-bold text-emerald-900">${p.nama} <span class="text-slate-500 font-normal">(${p.jk})</span></div>
+                  <div class="text-[11px] text-slate-500">No. Lab: <b>${p.nolab}</b> | NIK: ${p.nik || '-'}</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
+              </div>
+            `;
+          });
+          dropdown.innerHTML = html;
+          dropdown.classList.remove('hidden');
+        } else {
+          dropdown.innerHTML = '<div class="p-2.5 text-slate-400 italic text-center">Data tidak ditemukan.</div>';
+          dropdown.classList.remove('hidden');
+        }
+      }
+    }
+
+    function pilihPasienRekap(nolab) {
+      const p = dbPasien.find(x => x.nolab === nolab);
+      if (!p) return;
+      document.getElementById('search-rekap').value = `${p.nolab} - ${p.nama}`;
+      document.getElementById('search-rekap-dropdown').classList.add('hidden');
+      renderTableRekap(p.nolab);
+    }
+
+    function renderTableRekap(filter = '') {
+      const tbodyKlinik = document.getElementById('tbody-rekap-klinik');
+      const tbodyLingkungan = document.getElementById('tbody-rekap-lingkungan');
+      if (!tbodyKlinik || !tbodyLingkungan) return;
+
+      tbodyKlinik.innerHTML = '';
+      tbodyLingkungan.innerHTML = '';
+
+      const tglMulai = document.getElementById('filter-tgl-mulai').value;
+      const tglSelesai = document.getElementById('filter-tgl-selesai').value;
+
+      const filtered = dbPasien.filter(p => {
+        if (tglMulai && p.tglPeriksa && p.tglPeriksa < tglMulai) return false;
+        if (tglSelesai && p.tglPeriksa && p.tglPeriksa > tglSelesai) return false;
+
+        if (!filter) return true;
+        const q = filter.toLowerCase();
+        return p.nama.toLowerCase().includes(q) || 
+               p.nolab.toLowerCase().includes(q) || 
+               (p.nik && p.nik.includes(q));
+      });
+
+      if (filtered.length === 0) {
+        tbodyKlinik.innerHTML = `<tr><td colspan="7" class="border p-4 text-center text-slate-400">Tidak ada data rekap laboratorium klinik.</td></tr>`;
+        tbodyLingkungan.innerHTML = `<tr><td colspan="6" class="border p-4 text-center text-slate-400">Tidak ada data rekap laboratorium lingkungan.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(p => {
+        const hasKlinik = p.klinikTests && p.klinikTests.length > 0;
+        const hasLingkungan = p.lingkunganTests && p.lingkunganTests.length > 0;
+
+        if (hasKlinik || (!hasKlinik && !hasLingkungan)) {
+          tbodyKlinik.innerHTML += `
+            <tr class="hover:bg-slate-50">
+              <td class="border p-2 font-mono font-bold text-xs">${p.nolab}</td>
+              <td class="border p-2 text-xs">${formatTanggalIndo(p.tglPeriksa)}</td>
+              <td class="border p-2 text-xs">${p.nik || '-'}</td>
+              <td class="border p-2 font-semibold text-xs">${p.nama}</td>
+              <td class="border p-2 text-xs">${p.jk}</td>
+              <td class="border p-2 text-xs">${p.dokterPengirim || '-'}</td>
+              <td class="border p-2 text-center text-xs space-x-1">
+                <button onclick="editPasien(${p.id})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded shadow" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="pilihPasienHasil(${p.id}); switchTab('hasil');" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded shadow" title="Input/Edit Hasil"><i class="fa-solid fa-vials"></i></button>
+                <button onclick="activePatientId = ${p.id}; cetakHasilLab('klinik')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded shadow" title="Cetak Hasil"><i class="fa-solid fa-print"></i></button>
+                <button onclick="hapusPasien(${p.id})" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded shadow" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        }
+
+        if (hasLingkungan) {
+          tbodyLingkungan.innerHTML += `
+            <tr class="hover:bg-slate-50">
+              <td class="border p-2 font-mono font-bold text-xs">${p.nolab}</td>
+              <td class="border p-2 text-xs">${formatTanggalIndo(p.tglMinta)}</td>
+              <td class="border p-2 text-xs">${p.nama}</td>
+              <td class="border p-2 text-xs">${p.perusahaan || '-'}</td>
+              <td class="border p-2 text-xs">${p.alamat || '-'}</td>
+              <td class="border p-2 text-center text-xs space-x-1">
+                <button onclick="editPasien(${p.id})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded shadow" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="pilihPasienHasil(${p.id}); switchTab('hasil'); switchHasilSubTab('lingkungan');" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded shadow" title="Input/Edit Hasil"><i class="fa-solid fa-flask"></i></button>
+                <button onclick="activePatientId = ${p.id}; cetakHasilLab('lingkungan')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded shadow" title="Cetak Hasil"><i class="fa-solid fa-print"></i></button>
+                <button onclick="hapusPasien(${p.id})" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded shadow" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        }
+      });
+    }
+
+    function editPasien(id) {
+      const p = dbPasien.find(x => x.id === id);
+      if (!p) return;
+
+      switchTab('pendaftaran');
+      document.getElementById('edit-patient-id').value = p.id;
+      document.getElementById('p-nolab').value = p.nolab;
+      document.getElementById('p-nik').value = p.nik || '';
+      document.getElementById('p-nama').value = p.nama || '';
+      document.getElementById('p-perusahaan').value = p.perusahaan || '';
+      document.getElementById('p-jk').value = p.jk || 'Laki-laki';
+      document.getElementById('p-tmpt-lahir').value = p.tmptLahir || '';
+      document.getElementById('p-tgl-lahir').value = p.tglLahir || '';
+      document.getElementById('p-umur').value = p.umur || '';
+      document.getElementById('p-alamat').value = p.alamat || '';
+      document.getElementById('p-nohp').value = p.nohp || '';
+      document.getElementById('p-tgl-minta').value = p.tglMinta || '';
+      document.getElementById('p-tgl-periksa').value = p.tglPeriksa || '';
+      document.getElementById('p-dokter-pengirim').value = p.dokterPengirim || '';
+      document.getElementById('p-jns-spesimen').value = p.jnsSpesimen || '';
+      document.getElementById('p-btk-spesimen').value = p.btkSpesimen || '';
+      document.getElementById('p-knd-spesimen').value = p.kndSpesimen || '';
+      document.getElementById('p-vol-spesimen').value = p.volSpesimen || '';
+      document.getElementById('p-waktu-ambil').value = p.waktuAmbil || '';
+      document.getElementById('p-waktu-periksa').value = p.waktuPeriksa || '';
+      document.getElementById('p-waktu-selesai').value = p.waktuSelesai || '';
+      document.getElementById('ptg-sampling').value = p.ptgSampling || 'Arif Rahman';
+      document.getElementById('ptg-penerima').value = p.ptgPenerima || '';
+      document.getElementById('ptg-pemeriksa').value = p.ptgPemeriksa || '';
+      document.getElementById('ptg-nip-pemeriksa').value = p.ptgNipPemeriksa || '';
+      document.getElementById('kepala-lab').value = p.kepalaLab || '';
+      document.getElementById('kepala-lab-nip').value = p.kepalaLabNip || '';
+      document.getElementById('ptg-verifikator').value = p.ptgVerifikator || '';
+      document.getElementById('ptg-validasi').value = p.ptgValidasi || '';
+
+      document.querySelectorAll('input[name="klinik"]').forEach(cb => {
+        cb.checked = p.klinikTests && p.klinikTests.includes(cb.value);
+      });
+      document.querySelectorAll('input[name="lingkungan"]').forEach(cb => {
+        cb.checked = p.lingkunganTests && p.lingkunganTests.includes(cb.value);
+      });
+
+      document.getElementById('req-konsultasi').checked = !!p.reqKonsultasi;
+      document.getElementById('req-surat').checked = !!p.reqSurat;
+      toggleSuratSelect(!!p.reqSurat);
+      if (p.reqSurat && p.reqJnsSurat) {
+        document.getElementById('p-jns-surat-req').value = p.reqJnsSurat;
+      }
+    }
+
+    function hapusPasien(id) {
+      if (confirm('Apakah Anda yakin ingin menghapus data pasien ini?')) {
+        dbPasien = dbPasien.filter(x => x.id !== id);
+        localStorage.setItem('labkesda_tsm_db', JSON.stringify(dbPasien));
+        renderTableRekap();
+      }
+    }
+
+    function exportToCSV() {
+      if (dbPasien.length === 0) return alert('Tidak ada data untuk diekspor!');
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dbPasien, null, 2));
+      const dlAnchorElem = document.createElement('a');
+      dlAnchorElem.setAttribute("href", dataStr);
+      dlAnchorElem.setAttribute("download", `backup_data_labkesda_${new Date().toISOString().slice(0,10)}.json`);
+      dlAnchorElem.click();
+    }
+
+    function importDataFromJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            if (confirm(`Impor ${importedData.length} data pasien? Data yang ada saat ini akan diperbarui.`)) {
+              dbPasien = importedData;
+              localStorage.setItem('labkesda_tsm_db', JSON.stringify(dbPasien));
+              renderTableRekap();
+              alert('Data berhasil diimpor!');
+            }
+          } else {
+            alert('Format file JSON tidak valid.');
+          }
+        } catch (err) {
+          alert('Gagal membaca file: ' + err.message);
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
